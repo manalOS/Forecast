@@ -3,17 +3,35 @@
 <head>
 <title>Google Maps</title>
 <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
-<style>#mapcanvas { height: 350px; width: 350px}</style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="application.css">
+
+<style>#mapcanvas { margin: 0 auto; height: 420px; width: 740px}</style>
 <script>
+var icons = ['clear-day', 'clear-night','rain',  'snow', 'sleet', 'wind','fog', 'cloudy','partly-cloudy-day','partly-cloudy-night'];
+var iconURL = ['clear-day.png', 'clear-night.png','rain.png',  'snow.png', 'sleet.png', 'wind.png','fog.png', 'cloudy.png','partly-cloudy-day.png','partly-cloudy-night.png'];
+
 var map;
+var apiKey = '17e728b6492426e2aa7be8a15dd39759';
+var url = 'https://api.forecast.io/forecast/';
+var weather;
+var infowindow;
+var today = new Date();
+var days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+// Initiate Map
 function initMap() {
 	  var options = {
-		      zoom: 4,
+		      zoom: 5,
 		      center: new google.maps.LatLng(23.759101, 44.424069),
-		      mapTypeId: google.maps.MapTypeId.SATELLITE
+		      mapTypeId: google.maps.MapTypeId.TERRAIN
 				    }
 	  map = new google.maps.Map(document.getElementById("mapcanvas"), options);
 	  
+	  addMarkers();
+} // End map
+
+// Markers
+function addMarkers() {
       var locations = ['Riyadh','Mecca', 'Dammam', 'Tabuk', 'Abha'];
       var geocoder = new google.maps.Geocoder();
       var lat;
@@ -21,9 +39,11 @@ function initMap() {
       var title;
       var label;
 
+
    for (i = 0; i < locations.length; i++)
    {
        var currentToolTip = locations[i]
+       infowindow = new google.maps.InfoWindow();
        
        geocoder.geocode({'address': currentToolTip}, 
     		   function(results, status) 
@@ -33,26 +53,71 @@ function initMap() {
    	  				 lat = results[0].geometry.location.lat();
    	           		 lng = results[0].geometry.location.lng();
    	           		 title = results[0].address_components[0].long_name;
+
+   	           		 // add Marker
    	    	    	  var marker = new google.maps.Marker({
    	   		   	      map: map,
    	  		   	      position: results[0].geometry.location,
    	  		   	      title: title,
-   	  		   	   	  animation: google.maps.Animation.BOUNCE,
+   	  		   	      icon:'icon2.png',
+   	  		   	   	  animation: google.maps.Animation.DROP,
    	  		   	      label: title,
    	  			   	  latitude: lat,
    	      		      longitude: lng
-   	  		     										 });
+   	  		     										 }); //End add Marker    
+   	  		     	$.getJSON(url + apiKey + "/" + lat + "," + lng + "?units=si", function(data) {
+   	  		       var a = icons.indexOf(data.daily.data[0].icon);
+   	  		     	marker.info = "<div id='header'>"
+   	  		     	 + marker.title
+   	  		    +"<div id='header2'>"
+   	  		    + "TODAY"
+   	  		    +"<br />"
+   	  		    + days[today.getDay()] +",  "+today.getDate() +"-" + today.getMonth() + "-" + today.getFullYear()
+   	  		    +"</div>"
+   	  		    +"<div id='leftC'>"
+   	  		    +"<img src='" + iconURL[a] + "' height='47' width='50'/>"
+   	  		    +"<br>"
+   	  		    +data.daily.data[0].icon
+   	  		    +"<br>"
+   	  		    +"</div>"
+   	  		    +"<div id='rightC'>"
+   	  		    +"<h2>"
+   	  		    + data.currently.temperature +" &deg;C"
+   	  		    +"</h2>"
+   	  		    +"<p>"
+   	  		    +"H: " 
+   	  		    +data.daily.data[0].temperatureMax +"&deg; <br />"
+   	  		    +"L: " 
+   	  		    +data.daily.data[0].temperatureMin +"&deg;"
+   	  		    +"</p>"
+   	  		    +"</div>"
+   	  		    +"</div>";
+   	  		   marker.setIcon(iconURL[a]);
+   	  		     	});
+
+  	google.maps.event.addListener( marker, 'click', function() {
+   	infowindow.setContent( ''+ this.info );
+   	  infowindow.open( map, this );
+   	});
+
    			      } 
    	  			  else {
    	      alert('Geocode was not successful for the following reason: ' + status);
    	  				   }
-   	 		  });
-   }
-}
+   	 		  }); //end function
+   } //end for loop
+}// end Markers
  
 </script>
 </head>
 <body onload="initMap()">
+<div id="banner">
+</div>
+<p id="body">	Click On the city to view current temperature</p>
 <div id="mapcanvas"></div>
-</body>
+<div></div>
+
+
+
+ </body>
 </html>
