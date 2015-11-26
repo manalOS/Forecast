@@ -10,13 +10,15 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import java.net.URL;
  
+
+
 public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
         stage.setTitle("Forecast Application");
-        stage.setWidth(400);
-        stage.setHeight(400);
+        stage.setWidth(818);
+        stage.setHeight(645);
         
         Scene scene = new Scene(new Group());
         VBox root = new VBox();     
